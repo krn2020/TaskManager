@@ -1,20 +1,35 @@
-﻿// Program.cs
-using TaskManager.Configuration;
-using TaskManager.UI;
+﻿using Avalonia;
+using Avalonia.ReactiveUI;
+using System;
+using System.Reflection.PortableExecutable;
+
+namespace TaskProcessorApp;
 
 class Program
 {
-    static void Main(string[] args)
-    {
-        // Загружаем конфигурацию
-        int workerCount = ConfigLoader.LoadWorkerCount("config.xml");
-        Console.WriteLine($"Конфигурация: {workerCount} воркер(ов)");
+    [STAThread]
+    public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
 
-        // Создаём диспетчер и UI
-        var taskManager = new TaskManager.Services.TaskManager();
-        var ui = new ConsoleUI(taskManager, workerCount);
-
-        // Запускаем интерфейс
-        ui.Run();
-    }
+    public static AppBuilder BuildAvaloniaApp()
+        => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .LogToTrace()
+            .UseReactiveUI();
 }
+
+//using TaskManager.Configuration;
+//using TaskManager.UI;
+
+//class Program
+//{
+//    static void Main(string[] args)
+//    {
+//        int workerCount = ConfigLoader.LoadWorkerCount("config.xml");
+//        Console.WriteLine($"Конфигурация: {workerCount} воркер(ов)");
+
+//        var taskManager = new TaskManager.Services.TaskManager();
+//        var ui = new ConsoleUI(taskManager, workerCount);
+
+//        ui.Run();
+//    }
+//}

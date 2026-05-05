@@ -1,0 +1,56 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TaskProcessorApp.Views.MainWindow"
+        Title="Task Processor with Priorities"
+        Width="900" Height="700">
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" Spacing="10">
+            <TextBox Text="{Binding NewTaskName}" Width="200" Watermark="Имя задачи"/>
+            <NumericUpDown Value="{Binding NewTaskPriority}" Minimum="1" Maximum="10" Width="80"/>
+            <Button Command="{Binding AddTaskCommand}" Content="Добавить задачу"/>
+            <Button Command="{Binding StartCommand}" Content="Старт" Background="Green"/>
+            <Button Command="{Binding StopCommand}" Content="Стоп" Background="Red"/>
+            <Button Command="{Binding RefreshCommand}" Content="Обновить"/>
+            <Button Command="{Binding ShowHistoryCommand}" Content="История"/>
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="20,0,0,0"/>
+        </StackPanel>
+
+        <TabControl DockPanel.Dock="Top" Margin="10">
+            <TabItem Header="Текущие задачи">
+                <Grid ColumnDefinitions="*,*">
+                    <DataGrid Grid.Column="0" ItemsSource="{Binding QueueTasks}" AutoGenerateColumns="False" Margin="5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Имя" Binding="{Binding Name}" Width="150"/>
+                            <DataGridTextColumn Header="Приор." Binding="{Binding Priority}" Width="70"/>
+                            <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="80"/>
+                            <DataGridTextColumn Header="Добавлена" Binding="{Binding AddedTime, StringFormat='HH:mm:ss'}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <DataGrid Grid.Column="1" ItemsSource="{Binding RunningTasks}" AutoGenerateColumns="False" Margin="5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Воркер" Binding="{Binding Key}" Width="70"/>
+                            <DataGridTextColumn Header="ID задачи" Binding="{Binding Value.Id}" Width="80"/>
+                            <DataGridTextColumn Header="Имя" Binding="{Binding Value.Name}" Width="150"/>
+                            <DataGridTextColumn Header="Приор." Binding="{Binding Value.Priority}" Width="70"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="История выполненных задач">
+                <DataGrid ItemsSource="{Binding HistoryTasks}" AutoGenerateColumns="False" Margin="10">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                        <DataGridTextColumn Header="Имя" Binding="{Binding Name}" Width="150"/>
+                        <DataGridTextColumn Header="Приор." Binding="{Binding Priority}" Width="70"/>
+                        <DataGridTextColumn Header="Добавлена" Binding="{Binding AddedTime}" Width="120"/>
+                        <DataGridTextColumn Header="Старт" Binding="{Binding StartTime}" Width="120"/>
+                        <DataGridTextColumn Header="Окончание" Binding="{Binding EndTime}" Width="120"/>
+                        <DataGridTextColumn Header="Длит.(сек)" Binding="{Binding Duration, StringFormat={}{0:F1}}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

@@ -11,6 +11,7 @@
         public DateTime AddedTime { get; }
         public DateTime? StartTime { get; private set; }
         public DateTime? EndTime { get; private set; }
+        public double Duration => (EndTime - StartTime)?.TotalSeconds ?? 0;
 
         public WorkTask(int id, string name, int priority)
         {
