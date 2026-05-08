@@ -1,55 +1,149 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="TaskProcessorApp.Views.MainWindow"
+        xmlns:vm="clr-namespace:TaskManager.ViewModels"
+        x:Class="TaskManager.Views.MainWindow"
         Title="Task Processor with Priorities"
-        Width="900" Height="700">
+        Width="1000" Height="700"
+        Background="#1E1E1E">
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Window.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+        <Style Selector="NumericUpDown">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="#252526"/>
+            <Setter Property="BorderBrush" Value="#3D3D3D"/>
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Background" Value="#252526"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="TabItem">
+            <Setter Property="Background" Value="#2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+    </Window.Styles>
 
     <DockPanel>
+        <!-- Верхняя панель -->
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" Spacing="10">
             <TextBox Text="{Binding NewTaskName}" Width="200" Watermark="Имя задачи"/>
-            <NumericUpDown Value="{Binding NewTaskPriority}" Minimum="1" Maximum="10" Width="80"/>
-            <Button Command="{Binding AddTaskCommand}" Content="Добавить задачу"/>
-            <Button Command="{Binding StartCommand}" Content="Старт" Background="Green"/>
-            <Button Command="{Binding StopCommand}" Content="Стоп" Background="Red"/>
-            <Button Command="{Binding RefreshCommand}" Content="Обновить"/>
-            <Button Command="{Binding ShowHistoryCommand}" Content="История"/>
+            <NumericUpDown Value="{Binding NewTaskPriority}" Minimum="1" Maximum="10" Width="120"/>
+            <Button Command="{Binding AddTaskCommand}" Content="➕ Добавить" Background="#007ACC"/>
+            <Button Command="{Binding StartCommand}" Content="▶ Старт" Background="#2E7D32"/>
+            <Button Command="{Binding StopCommand}" Content="⏹ Стоп" Background="#C62828"/>
+            <Button Command="{Binding RefreshCommand}" Content="🔄 Обновить"/>
+            <Button Command="{Binding ShowHistoryCommand}" Content="📋 История"/>
             <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="20,0,0,0"/>
         </StackPanel>
 
-        <TabControl DockPanel.Dock="Top" Margin="10">
-            <TabItem Header="Текущие задачи">
-                <Grid ColumnDefinitions="*,*">
-                    <DataGrid Grid.Column="0" ItemsSource="{Binding QueueTasks}" AutoGenerateColumns="False" Margin="5">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                            <DataGridTextColumn Header="Имя" Binding="{Binding Name}" Width="150"/>
-                            <DataGridTextColumn Header="Приор." Binding="{Binding Priority}" Width="70"/>
-                            <DataGridTextColumn Header="Статус" Binding="{Binding Status}" Width="80"/>
-                            <DataGridTextColumn Header="Добавлена" Binding="{Binding AddedTime, StringFormat='HH:mm:ss'}" Width="100"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <DataGrid Grid.Column="1" ItemsSource="{Binding RunningTasks}" AutoGenerateColumns="False" Margin="5">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Воркер" Binding="{Binding Key}" Width="70"/>
-                            <DataGridTextColumn Header="ID задачи" Binding="{Binding Value.Id}" Width="80"/>
-                            <DataGridTextColumn Header="Имя" Binding="{Binding Value.Name}" Width="150"/>
-                            <DataGridTextColumn Header="Приор." Binding="{Binding Value.Priority}" Width="70"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </TabItem>
+        <TabControl Margin="10">
+            <TabItem Header="📌 Текущие задачи">
+    <Grid ColumnDefinitions="*,*">
+        <!-- Левая колонка: очередь -->
+        <Border Grid.Column="0" Margin="5">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <!-- Заголовки -->
+                <Border Grid.Row="0" Background="#3D3D3D" CornerRadius="4" Margin="0,0,0,5">
+                    <Grid ColumnDefinitions="50,*,70,90,100" Margin="10,5">
+                        <TextBlock Text="ID" FontWeight="Bold" Foreground="White" Grid.Column="0"/>
+                        <TextBlock Text="Имя задачи" FontWeight="Bold" Foreground="White" Grid.Column="1"/>
+                        <TextBlock Text="Приор." FontWeight="Bold" Foreground="White" Grid.Column="2"/>
+                        <TextBlock Text="Статус" FontWeight="Bold" Foreground="White" Grid.Column="3"/>
+                        <TextBlock Text="Добавлена" FontWeight="Bold" Foreground="White" Grid.Column="4"/>
+                    </Grid>
+                </Border>
+                <!-- Список -->
+                <ListBox Grid.Row="1" ItemsSource="{Binding QueueTasks}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="50,*,70,90,100">
+                                <TextBlock Text="{Binding Id}" Grid.Column="0"/>
+                                <TextBlock Text="{Binding Name}" Grid.Column="1"/>
+                                <TextBlock Text="{Binding Priority}" Grid.Column="2"/>
+                                <TextBlock Text="{Binding AddedTime, StringFormat='HH:mm:ss'}" Grid.Column="4"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <!-- Правая колонка: выполняемые -->
+        <Border Grid.Column="1" Margin="5">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <Border Grid.Row="0" Background="#3D3D3D" CornerRadius="4" Margin="0,0,0,5">
+                    <Grid ColumnDefinitions="80,*,100,70" Margin="10,5">
+                        <TextBlock Text="Воркер" FontWeight="Bold" Foreground="White" Grid.Column="0"/>
+                        <TextBlock Text="Имя задачи" FontWeight="Bold" Foreground="White" Grid.Column="1"/>
+                        <TextBlock Text="Приоритет" FontWeight="Bold" Foreground="White" Grid.Column="2"/>
+                        <TextBlock Text="ID" FontWeight="Bold" Foreground="White" Grid.Column="3"/>
+                    </Grid>
+                </Border>
+                <ListBox Grid.Row="1" ItemsSource="{Binding RunningTasks}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="80,*,100,70">
+                                <TextBlock Text="{Binding Key}" Grid.Column="0"/>
+                                <TextBlock Text="{Binding Value.Name}" Grid.Column="1"/>
+                                <TextBlock Text="{Binding Value.Priority}" Grid.Column="2"/>
+                                <TextBlock Text="{Binding Value.Id}" Grid.Column="3"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+    </Grid>
+</TabItem>
+
+
             <TabItem Header="История выполненных задач">
-                <DataGrid ItemsSource="{Binding HistoryTasks}" AutoGenerateColumns="False" Margin="10">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
-                        <DataGridTextColumn Header="Имя" Binding="{Binding Name}" Width="150"/>
-                        <DataGridTextColumn Header="Приор." Binding="{Binding Priority}" Width="70"/>
-                        <DataGridTextColumn Header="Добавлена" Binding="{Binding AddedTime}" Width="120"/>
-                        <DataGridTextColumn Header="Старт" Binding="{Binding StartTime}" Width="120"/>
-                        <DataGridTextColumn Header="Окончание" Binding="{Binding EndTime}" Width="120"/>
-                        <DataGridTextColumn Header="Длит.(сек)" Binding="{Binding Duration, StringFormat={}{0:F1}}" Width="80"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <Grid RowDefinitions="Auto,*">
+                    <Border Background="#3D3D3D" CornerRadius="4" Margin="5,0,5,5">
+                        <Grid ColumnDefinitions="50,*,70,120,120,120,80" Margin="5,5">
+                            <TextBlock Text="ID" FontWeight="Bold" Grid.Column="0"/>
+                            <TextBlock Text="Имя" FontWeight="Bold" Grid.Column="1"/>
+                            <TextBlock Text="Приор." FontWeight="Bold" Grid.Column="2"/>
+                            <TextBlock Text="Добавлена" FontWeight="Bold" Grid.Column="3"/>
+                            <TextBlock Text="Старт" FontWeight="Bold" Grid.Column="4"/>
+                            <TextBlock Text="Окончание" FontWeight="Bold" Grid.Column="5"/>
+                            <TextBlock Text="Длит." FontWeight="Bold" Grid.Column="6"/>
+                        </Grid>
+                    </Border>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding HistoryTasks}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="50,*,70,120,120,120,80">
+                                    <TextBlock Text="{Binding Id}" Grid.Column="0"/>
+                                    <TextBlock Text="{Binding Name}" Grid.Column="1"/>
+                                    <TextBlock Text="{Binding Priority}" Grid.Column="2"/>
+                                    <TextBlock Text="{Binding AddedTime, StringFormat='G'}" Grid.Column="3"/>
+                                    <TextBlock Text="{Binding StartTime, StringFormat='G'}" Grid.Column="4"/>
+                                    <TextBlock Text="{Binding EndTime, StringFormat='G'}" Grid.Column="5"/>
+                                    <TextBlock Text="{Binding Duration, StringFormat='F1'}" Grid.Column="6"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
             </TabItem>
         </TabControl>
     </DockPanel>

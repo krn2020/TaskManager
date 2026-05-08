@@ -1,0 +1,12 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:anim="clr-namespace:AnimatedImage.Avalonia;assembly=AnimatedImage.Avalonia"
+        x:Class="TaskManager.Views.GifWindow"
+        Title="Worker [WorkerId Placeholder]" 
+        Width="400" Height="400"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Image anim:ImageBehavior.AnimatedSource="{Binding GifUrl}" 
+               Stretch="Uniform"/>
+    </Grid>
+</Window>

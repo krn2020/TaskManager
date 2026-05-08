@@ -8,16 +8,16 @@ namespace TaskManager.Services
         private readonly int _id;
         private readonly TaskQueue _queue;
         private readonly HistoryService _history;
-        private readonly TaskManager _manager;
-        private Thread _thread;
+        private readonly TaskDispatcher _dispatcher;
+        private Thread? _thread;
         private volatile bool _shouldStop;
 
-        public Worker(int id, TaskQueue queue, HistoryService history, TaskManager manager)
+        public Worker(int id, TaskQueue queue, HistoryService history, TaskDispatcher dispatcher)
         {
             _id = id;
             _queue = queue;
             _history = history;
-            _manager = manager;
+            _dispatcher = dispatcher;
         }
 
         public void Start()
@@ -33,35 +33,27 @@ namespace TaskManager.Services
             _thread?.Join(TimeSpan.FromSeconds(10));
         }
 
-        private void Run()
+        private async void Run()
         {
             while (!_shouldStop)
             {
-                // Проверяем, запущена ли система (разрешено ли брать новые задачи)
-                if (!_manager.IsRunning)
+                if (!_dispatcher.IsRunning)
                 {
-                    // Если система остановлена и очередь пуста – выходим
-                    if (_queue.Count == 0)
-                        break;
-                    // Иначе даём время на завершение уже взятых задач (текущая задача уже выполняется)
+                    if (_queue.Count == 0) break;
                     Thread.Sleep(500);
                     continue;
                 }
 
-                // Ожидаем задачу с таймаутом, чтобы периодически проверять _shouldStop
                 if (_queue.TryDequeue(out WorkTask task, 500))
                 {
-                    // Регистрируем задачу как выполняемую
-                    _manager.RegisterRunningTask(_id, task);
+                    _dispatcher.RegisterRunningTask(_id, task);
                     task.Start();
-
-                    // Выполняем задачу
-                    task.Execute();
-
-                    // Завершаем задачу
+            
+                    await task.ExecuteWithGifAsync(task, _id);
+            
                     task.Complete();
                     _history.Add(task);
-                    _manager.UnregisterRunningTask(_id);
+                    _dispatcher.UnregisterRunningTask(_id);
                 }
             }
         }

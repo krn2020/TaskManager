@@ -1,20 +1,14 @@
 ﻿using Avalonia;
 using Avalonia.ReactiveUI;
-using System;
-using System.Reflection.PortableExecutable;
 
-namespace TaskProcessorApp;
-
-class Program
+namespace TaskManager
 {
-    [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .LogToTrace()
-            .UseReactiveUI();
+    class Program
+    {
+        [STAThread]
+        public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().LogToTrace().UseReactiveUI();
+    }
 }
 
 //using TaskManager.Configuration;

@@ -1,8 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using TaskManager.ViewModels;
 
-namespace TaskProcessorApp.Views;
+namespace TaskManager.Views;
 
 public partial class MainWindow : Window
 {

@@ -2,10 +2,10 @@
 {
     public class ConsoleUI
     {
-        private readonly Services.TaskManager _taskManager;
+        private readonly Services.TaskDispatcher _taskManager;
         private readonly int _workerCount;
 
-        public ConsoleUI(Services.TaskManager taskManager, int workerCount)
+        public ConsoleUI(Services.TaskDispatcher taskManager, int workerCount)
         {
             _taskManager = taskManager;
             _workerCount = workerCount;

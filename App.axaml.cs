@@ -1,19 +1,24 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using TaskProcessorApp.Views;
-using static System.Net.Mime.MediaTypeNames;
+using TaskManager.Views;
 
-namespace TaskProcessorApp;
-
-public class App : Application
+namespace TaskManager
 {
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
-
-    public override void OnFrameworkInitializationCompleted()
+    public class App : Application
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = new MainWindow();
-        base.OnFrameworkInitializationCompleted();
+        public override void Initialize()
+        {
+            AvaloniaXamlLoader.Load(this);
+        }
+
+        public override void OnFrameworkInitializationCompleted()
+        {
+            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.MainWindow = new MainWindow();
+            }
+            base.OnFrameworkInitializationCompleted();
+        }
     }
 }
