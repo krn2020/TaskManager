@@ -1,25 +1,23 @@
-﻿using Avalonia;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using TaskManager.Services;
 
 namespace TaskManager.Views;
 public partial class GifWindow : Window
 {
-    private static int _windowCounter = 0;
-    private static readonly int OffsetStep = 40;
-
     public GifWindow(string workerId, string gifUrl)
     {
         InitializeComponent();
         Title = $"Воркер {workerId}";
         DataContext = new { GifUrl = gifUrl };
-            
-        var offset = _windowCounter++ * OffsetStep;
-        Position = new PixelPoint(100 + offset, 100 + offset);
-        Width = 400;
-        Height = 400;
+
+        Width = WindowPositionManager.WindowWidth;
+        Height = WindowPositionManager.WindowHeight;
         WindowStartupLocation = WindowStartupLocation.Manual;
-        
+
+        var position = WindowPositionManager.RequestNextPosition();
+        Position = position;
+        WindowPositionManager.RegisterWindow(this, position);
     }
     
     private void InitializeComponent()

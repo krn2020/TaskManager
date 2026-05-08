@@ -21,10 +21,29 @@ namespace TaskManager.ViewModels
         public ObservableDictionary<int, WorkTask> RunningTasks { get; } = new();
         public ObservableCollection<WorkTask> HistoryTasks { get; } = new();
 
-        public string NewTaskName { get => _newTaskName; set => this.RaiseAndSetIfChanged(ref _newTaskName, value); }
-        public int NewTaskPriority { get => _newTaskPriority; set => this.RaiseAndSetIfChanged(ref _newTaskPriority, value); }
-        public bool IsSystemRunning { get => _isSystemRunning; set => this.RaiseAndSetIfChanged(ref _isSystemRunning, value); }
-        public string StatusText { get => _statusText; set => this.RaiseAndSetIfChanged(ref _statusText, value); }
+        public string NewTaskName
+        {
+            get => _newTaskName;
+            set => this.RaiseAndSetIfChanged(ref _newTaskName, value);
+        }
+
+        public int NewTaskPriority
+        {
+            get => _newTaskPriority;
+            set => this.RaiseAndSetIfChanged(ref _newTaskPriority, value);
+        }
+
+        public bool IsSystemRunning
+        {
+            get => _isSystemRunning;
+            set => this.RaiseAndSetIfChanged(ref _isSystemRunning, value);
+        }
+
+        public string StatusText
+        {
+            get => _statusText;
+            set => this.RaiseAndSetIfChanged(ref _statusText, value);
+        }
 
         public ReactiveCommand<Unit, Unit> StartCommand { get; }
         public ReactiveCommand<Unit, Unit> StopCommand { get; }
@@ -53,16 +72,31 @@ namespace TaskManager.ViewModels
             Dispatcher.UIThread.Invoke(RefreshState);
         }
 
-        private void StartSystem() { _dispatcher.Start(_workerCount); IsSystemRunning = true; StatusText = "Работает"; RefreshState(); }
-        private void StopSystem() { _dispatcher.Stop(); IsSystemRunning = false; StatusText = "Остановлена"; RefreshState(); }
+        private void StartSystem()
+        {
+            _dispatcher.Start(_workerCount);
+            IsSystemRunning = true;
+            StatusText = "Работает";
+            RefreshState();
+        }
+
+        private void StopSystem()
+        {
+            _dispatcher.Stop();
+            IsSystemRunning = false;
+            StatusText = "Остановлена";
+            RefreshState();
+        }
+
         private void AddTask()
         {
             Console.WriteLine($"[UI] AddTask called. Name: {NewTaskName}, Priority: {NewTaskPriority}");
-            if (string.IsNullOrWhiteSpace(NewTaskName)) 
+            if (string.IsNullOrWhiteSpace(NewTaskName))
             {
                 Console.WriteLine("[UI] Task name is empty, ignoring.");
                 return;
             }
+
             _dispatcher.AddTask(NewTaskName, NewTaskPriority);
             Console.WriteLine("[UI] Task added to dispatcher, calling RefreshState");
             NewTaskName = "";
@@ -76,7 +110,7 @@ namespace TaskManager.ViewModels
             var queue = snapshot.queue;
             var running = snapshot.running;
             Console.WriteLine($"[UI] Queue count: {queue.Count}, Running count: {running.Count}");
-    
+
             Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Console.WriteLine("[UI] Updating UI collections...");
@@ -84,9 +118,18 @@ namespace TaskManager.ViewModels
                 foreach (var task in queue) QueueTasks.Add(task);
                 RunningTasks.Clear();
                 foreach (var kvp in running) RunningTasks.Add(kvp.Key, kvp.Value);
-                Console.WriteLine($"[UI] UI updated. QueueTasks count: {QueueTasks.Count}, RunningTasks count: {RunningTasks.Count}");
+                Console.WriteLine(
+                    $"[UI] UI updated. QueueTasks count: {QueueTasks.Count}, RunningTasks count: {RunningTasks.Count}");
+                HistoryTasks.Clear();
+                foreach (var task in _dispatcher.GetHistory()) HistoryTasks.Add(task);
             });
         }
+        
+        public void OnHistoryTabSelected()
+        {
+            ShowHistory();
+        }
+
         private void ShowHistory()
         {
             var history = _dispatcher.GetHistory();

@@ -1,5 +1,4 @@
-﻿
-using TaskManager.Models;
+﻿using TaskManager.Models;
 
 namespace TaskManager.Services
 {
@@ -40,7 +39,7 @@ namespace TaskManager.Services
                 if (!_dispatcher.IsRunning)
                 {
                     if (_queue.Count == 0) break;
-                    Thread.Sleep(500);
+                    await Task.Delay(500);
                     continue;
                 }
 
@@ -48,11 +47,16 @@ namespace TaskManager.Services
                 {
                     _dispatcher.RegisterRunningTask(_id, task);
                     task.Start();
-            
-                    await task.ExecuteWithGifAsync(task, _id);
-            
-                    task.Complete();
-                    _history.Add(task);
+                    bool completed = await task.ExecuteWithGifAsync(_id, _dispatcher.GlobalCancellationToken);
+                    if (completed)
+                    {
+                        task.Complete();
+                        _history.Add(task);
+                    }
+                    else
+                    {
+                        _queue.Enqueue(task);
+                    }
                     _dispatcher.UnregisterRunningTask(_id);
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using TaskManager.Models;
+
 namespace TaskManager.Services
 {
     public class TaskDispatcher
@@ -10,14 +11,19 @@ namespace TaskManager.Services
         private readonly object _lock = new();
         private bool _isRunning = false;
         private int _nextTaskId = 1;
+        private CancellationTokenSource _globalCts = new();
 
-        public bool IsRunning { get { lock (_lock) { return _isRunning; } } }
+        public bool IsRunning => _isRunning;
+        public CancellationToken GlobalCancellationToken => _globalCts.Token;
+
         public event Action? StateChanged;
+
         public void Start(int workerCount)
         {
             lock (_lock)
             {
                 if (_isRunning) return;
+                _globalCts = new CancellationTokenSource();
                 if (_workers.Count == 0)
                 {
                     for (int i = 0; i < workerCount; i++)
@@ -26,18 +32,33 @@ namespace TaskManager.Services
                 foreach (var w in _workers) w.Start();
                 _isRunning = true;
             }
+            StateChanged?.Invoke();
         }
 
         public void Stop()
         {
             lock (_lock) { _isRunning = false; }
+            _globalCts.Cancel();
             foreach (var w in _workers) w.Stop();
+            StateChanged?.Invoke();
         }
 
         public void AddTask(string name, int priority)
         {
             var task = new WorkTask(_nextTaskId++, name, priority);
-            _queue.Enqueue(task);
+            lock (_lock)
+            {
+                // Найти выполняющуюся задачу с более низким приоритетом (число приоритета больше)
+                var lowerPriorityRunning = _runningTasks.Values
+                    .Where(t => t.Priority > priority) // более высокое число = менее важная
+                    .OrderByDescending(t => t.Priority)
+                    .FirstOrDefault();
+                if (lowerPriorityRunning != null)
+                {
+                    lowerPriorityRunning.CancelAsync();
+                }
+                _queue.Enqueue(task);
+            }
             StateChanged?.Invoke();
         }
 
